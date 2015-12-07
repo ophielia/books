@@ -1,0 +1,8 @@
+.settings
+.classpath
+.project
+log.roo
+target
+bin
+/.springBeans
+/git/
