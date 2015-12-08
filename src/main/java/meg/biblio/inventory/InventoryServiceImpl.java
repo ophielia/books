@@ -248,6 +248,24 @@ public class InventoryServiceImpl implements InventoryService {
 				.getId());
 		return current;
 	}
+	
+	@Override
+	public InventoryStatus getLastCompleted(ClientDao client) {
+		
+		// get previous inventories
+		List<InventoryDao> inventories = getPreviousInventories(client);
+		
+		// pull out last completed
+		InventoryStatus lastcompleted = null;
+		for (InventoryDao inv:inventories) {
+			if (inv.getCompleted()!=null && inv.getCompleted()==true) {
+				lastcompleted=getInventoryStatus(inv, client);
+				break;
+			}
+		}
+		
+		return lastcompleted;
+	}
 
 	@Override
 	public InventoryDao getInventoryById(Long invid) {
@@ -470,6 +488,7 @@ public class InventoryServiceImpl implements InventoryService {
 					// set userid for book
 					if (saveinstack) {
 						countedbook.setUserid(userid);
+						countedbook.setCounteddate(new Date());
 					}
 					countedbook.setCounteddate(new Date());
 					// save book
@@ -670,6 +689,11 @@ public class InventoryServiceImpl implements InventoryService {
 		}
 		c.where(cb.and(whereclause.toArray(new Predicate[whereclause.size()])));
 
+		// add order by for stack
+		if (searchtype == StackSearchType.STACK) {
+			c.orderBy(cb.asc(bookroot.get("counteddate")));
+		}
+		
 		TypedQuery<InvStackDisplay> q = entityManager.createQuery(c);
 		return q.getResultList();
 	}
