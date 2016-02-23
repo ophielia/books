@@ -12,10 +12,20 @@
 	</definition>
 	
 
+	<definition extends="default" name="barcode/generatebookscustom">
+		<put-attribute name="body"
+			value="/WEB-INF/views/barcode/generatebookscustom.jspx" />
+	</definition>
+	
 	<definition extends="default" name="barcode/generateclass">
 		<put-attribute name="body"
 			value="/WEB-INF/views/barcode/generateclass.jspx" />
 	</definition>
+	
+	<definition extends="default" name="barcode/generateclasscustom">
+		<put-attribute name="body"
+			value="/WEB-INF/views/barcode/generateclasscustom.jspx" />
+	</definition>	
 
 	<definition extends="default" name="barcode/maincheckout">
 		<put-attribute name="body"

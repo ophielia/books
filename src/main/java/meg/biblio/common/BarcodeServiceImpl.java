@@ -50,9 +50,12 @@ public class BarcodeServiceImpl implements BarcodeService {
 	@Autowired
 	ClassManagementService classService;
 
+	@Autowired
+	CacheService cacheService;
+	
 	@Override
 	public BarcodeSheet assembleBarcodeSheetForBooks(int barcodecnt,int startcode,
-			Long clientid, Locale locale) {
+			int offset, Long clientid, Locale locale) {
 		
 		// get client
 		ClientDao client = clientService.getClientForKey(clientid);
@@ -75,7 +78,7 @@ public class BarcodeServiceImpl implements BarcodeService {
 		} catch (Exception e) {
 			title = "barcodes";
 		}
-		BarcodeSheet sheet = new BarcodeSheet(codes, title);
+		BarcodeSheet sheet = new BarcodeSheet(codes, title, offset);
 		// return BookBarcodeSheet
 		return sheet;
 	}
@@ -147,7 +150,7 @@ public class BarcodeServiceImpl implements BarcodeService {
 			classcodes.add(bc);
 		}
 		// construct BarcodeSheet
-		BarcodeSheet bcs = new BarcodeSheet(classcodes, title);
+		BarcodeSheet bcs = new BarcodeSheet(classcodes, title, 0);
 		// return BarcodeSheet
 		return bcs;
 
@@ -208,6 +211,106 @@ public class BarcodeServiceImpl implements BarcodeService {
 
 		// return new barcode
 		return barcode;
+	}
+
+	@Override
+	public BarcodeSheet assembleBarcodeSheetForBooksFromCache(String username,
+			int offset, Long clientkey, Locale locale) {
+		// get client
+		ClientDao client = clientService.getClientForKey(clientkey);
+		// message
+		String message = client.getName();
+		
+		// get values from cache
+		List<String> cachevals = cacheService.getValidCacheAsList(username,
+				CacheService.CodeTag.CustomBarcodes, "");		
+		
+		// put together list of barcodes
+		// add all to the list of codes, filling in the message
+		List<Barcode> bookcodes = new ArrayList<Barcode>();
+		for (String newcode : cachevals) {
+			String barcode = getBookBarcodeForClientid(client,newcode);
+			Barcode bc = new Barcode(barcode,
+					message);
+			bookcodes.add(bc);
+		}
+		
+		// construct BarcodeSheet with codes and offset
+		BarcodeSheet bcs = new BarcodeSheet(bookcodes, "", offset);
+		
+		// return BarcodeSheet
+		return bcs;	
+	}	
+
+
+
+
+	@Override
+	public BarcodeSheet assembleBarcodeSheetForClassFromCache(Long classId,String username,
+			Long clientid, int offset,Locale locale) {
+		// get client
+		ClientDao client = clientService.getClientForKey(clientid);
+
+		// assign codes to any students without codes
+		SchoolGroupDao schoolgroup = classService.getClassForClient(classId,
+				clientid);
+		List<StudentDao> nocodestudents = studentRepo
+				.findActiveStudentsForClassWithoutBarcode(schoolgroup, client,
+						null);
+		// ensure that teacher has a code
+		List<TeacherDao> nocodeteachers = teacherRepo
+				.findActiveTeachersForClientAndClassWithoutBarcode(client,
+						schoolgroup);
+		
+		List<PersonDao> toassign = new ArrayList<PersonDao>();
+		toassign.addAll(nocodeteachers);
+		toassign.addAll(nocodestudents);
+		if (toassign!=null && toassign.size()>0) {
+			List<PersonDao> toupdate = new ArrayList<PersonDao>();
+			List<Barcode> newcodes = generateCodes(toassign.size(),0,
+					BarcodeService.CodeType.PERSON, client, "");
+			int i = 0;
+			for (PersonDao person : toassign) {
+				PersonDao toupd = personRepo.findOne(person.getId());
+				Barcode bc = newcodes.get(i);
+				toupd.setBarcodeid(bc.getCode());
+				toupdate.add(toupd);
+				i++;
+			}
+			personRepo.save(toupdate);
+		}
+
+		// load classmodel
+		ClassModel model = classService.loadClassModelById(schoolgroup.getId());
+
+		// get message for title
+		String teachername = model.getTeacher().getFulldisplayname();
+		String base = appMessageSource.getMessage("reports_barcode_classtitle",
+				null, locale);
+
+		String title = base + teachername;
+		
+		// get list of codes to be printed for class
+		List<Long> cachevals = cacheService.getValidCacheAsListofLongs(username,
+				CacheService.CodeTag.ClassBarcodes, String.valueOf(classId));
+		
+		// get corresponding PersonDao for list of codes
+		List<PersonDao> printfor = personRepo.findAll(cachevals);
+		
+		// add all to the list of codes, filling in the message
+		List<Barcode> classcodes = new ArrayList<Barcode>();
+		for (PersonDao person : printfor) {
+			Barcode bc = new Barcode(person.getBarcodeid(),
+					person.getFulldisplayname());
+			classcodes.add(bc);
+		}
+		
+		// construct BarcodeSheet with codes and offset
+		BarcodeSheet bcs = new BarcodeSheet(classcodes, title, offset);
+		
+		// return BarcodeSheet
+		return bcs;
+
 	}
 
 }

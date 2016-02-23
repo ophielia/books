@@ -65,8 +65,6 @@ public class PDFController {
 	private FopFactory fopFactory = FopFactory.newInstance();
 	private TransformerFactory tFactory = TransformerFactory.newInstance();
 
-	private String transformdir = "resources/transform/";
-	
 	protected URIResolver uriResolver;
 	
 	public URIResolver getResolver() throws ServletException {
@@ -231,7 +229,7 @@ public class PDFController {
 
 			int codecount = codeCount.intValue();
 			BarcodeSheet sheet = barcodeService.assembleBarcodeSheetForBooks(
-					codecount,0, clientkey,locale);
+					codecount,0, 0,clientkey, locale);
 
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try {
@@ -266,9 +264,74 @@ public class PDFController {
 		}
 	}
 	
-	@RequestMapping(params = "range",value = "/bookbarcodes", method = RequestMethod.GET, produces = "text/html")
+	@RequestMapping(value = "/bookbarcodes", method = RequestMethod.GET, produces = "text/html")
+	public void generateBookBarcodeSheetCustom(
+			@RequestParam("startpos") Integer startpos,
+			@RequestParam("nudge") Integer nudge,
+			@RequestParam("border") Integer border,Model uiModel,
+			HttpServletRequest request, HttpServletRequest httpServletRequest,
+			HttpServletResponse response, Principal principal, Locale locale)
+			throws FOPException, JAXBException, TransformerException,
+			IOException, ServletException {	
+	
+		ClientDao client = clientService.getCurrentClient(principal);
+		Long clientkey = client.getId();
+		String username = principal.getName();
+		
+		String cxslname = "META-INF/web-resources/transform/"
+				+ client.getBarcodesheetxsl() + ".xsl";
+	
+		if (username != null) {
+			int offset = 0;
+			if (startpos !=null && startpos>=1) {
+				offset = startpos - 1;
+			}
+			
+			BarcodeSheet sheet = barcodeService.assembleBarcodeSheetForBooksFromCache(username, offset, clientkey, locale);
+			
+			// add nudge, and borders to sheet
+			sheet.setBorder(border);
+			sheet.setNudge(nudge);
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			try {
+	
+				Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, out);
+				JAXBContext context = JAXBContext
+						.newInstance(BarcodeSheet.class);
+				JAXBSource source = new JAXBSource(context, sheet);
+	
+				// Setup Transformer
+				Resource resource = new ClassPathResource(cxslname);
+				Source xsltSrc = new StreamSource(resource.getFile());
+				Transformer transformer = tFactory.newTransformer(xsltSrc);
+	
+				// Make sure the XSL transformation's result is piped through to
+				// FOPx
+				Result res = new SAXResult(fop.getDefaultHandler());
+	
+				// Start the transformation and rendering process
+				transformer.transform(source, res);
+	
+				// prepare response
+				response.setContentType("application/pdf");
+				response.setContentLength(out.size());
+	
+				// send content to browser
+				response.getOutputStream().write(out.toByteArray());
+				response.getOutputStream().flush();
+			} finally {
+				out.close();
+			}
+		}
+	}
+
+	@RequestMapping(value = "/bookbarcodes/range", method = RequestMethod.GET, produces = "text/html")
 	public void generateBookBarcodeSheetRange(
-			@RequestParam("from") Integer startcode,@RequestParam("to") Integer endcode, Model uiModel,
+			@RequestParam("from") Integer startcode,@RequestParam("to") Integer endcode, 
+			@RequestParam("startpos") Integer startpos,
+			@RequestParam("nudge") Integer nudge,
+			@RequestParam("border") Integer border,Model uiModel,
 			HttpServletRequest request, HttpServletRequest httpServletRequest,
 			HttpServletResponse response, Principal principal, Locale locale)
 			throws FOPException, JAXBException, TransformerException,
@@ -284,9 +347,17 @@ public class PDFController {
 			int start = startcode.intValue();
 			int end = endcode.intValue();
 			int count = end-start;
+			int offset = 0;
+			if (startpos !=null && startpos>=1) {
+				offset = startpos - 1;
+			}
+			
 			BarcodeSheet sheet = barcodeService.assembleBarcodeSheetForBooks(
-					count, start,clientkey,locale);
+					count, start,offset,clientkey, locale);
 
+			sheet.setBorder(border);
+			sheet.setNudge(nudge);
+			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try {
 
@@ -321,24 +392,37 @@ public class PDFController {
 
 	}
 	
-	
-	@RequestMapping(value = "/classbarcodes", method = RequestMethod.POST, produces = "text/html")
+	@RequestMapping(value = "/classbarcodes", method = RequestMethod.GET, produces = "text/html")
 	public void generateClassBarcodeSheet(
-			@RequestParam("classId") Long classId, Model uiModel,
+			@RequestParam("classId") Long classId,
+			@RequestParam("startpos") Integer startpos,
+			@RequestParam("nudge") Integer nudge,
+			@RequestParam("border") Integer border,Model uiModel,
 			HttpServletRequest request, HttpServletRequest httpServletRequest,
-			HttpServletResponse response, Principal principal,Locale locale)
+			HttpServletResponse response, Principal principal, Locale locale)
 			throws FOPException, JAXBException, TransformerException,
-			IOException, ServletException {
+			IOException, ServletException {	
+
 		ClientDao client = clientService.getCurrentClient(principal);
 		Long clientkey = client.getId();
-
+		String username = principal.getName();
+		
 		String cxslname = "META-INF/web-resources/transform/"
 				+ client.getBarcodesheetxsl() + ".xsl";
 
 		if (classId != null) {
-
-			BarcodeSheet sheet = barcodeService.assembleBarcodeSheetForClass(classId, clientkey, locale);
-
+			int offset = 0;
+			if (startpos !=null && startpos>=1) {
+				offset = startpos - 1;
+			}
+			
+			BarcodeSheet sheet = barcodeService.assembleBarcodeSheetForClassFromCache(classId, username,clientkey,offset
+					,locale);
+			
+			// add nudge, and borders to sheet
+			sheet.setBorder(border);
+			sheet.setNudge(nudge);
+			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try {
 
