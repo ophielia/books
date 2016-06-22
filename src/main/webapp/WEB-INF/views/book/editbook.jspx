@@ -27,6 +27,7 @@
 		var="lillustrator" />
 	<spring:message code="label_book_description" htmlEscape="false"
 		var="ldescription" />
+		<spring:message code="label_book_note" htmlEscape="false" var="lnote"/>
 	<spring:message code="label_book_publisher" htmlEscape="false"
 		var="lpublisher" />
 	<spring:message code="label_book_published" htmlEscape="false"
@@ -240,10 +241,7 @@ ${msgsearchagain}
 
 
 			<div class="elementcontainer">
-				<c:if test="${bookModel.clientbookid!=null}"><div>
-					<span class="stress">${clientname} ${lnumber}:</span> ${bookModel.clientbookid}
-				</div></c:if>
-				<form:input type="hidden" path="bookid"></form:input>
+				
 				<div>
 					<span class="stress">${ltitle}:</span><form:input type="text" path="title"></form:input>
 				</div>
@@ -311,6 +309,7 @@ ${msgsearchagain}
 						</c:forEach>
 					</form:select></div>
 				<div><span class="stress">${ldescription}:</span><form:textarea type="text" path="description" style="width: 300px;height: 150px; vertical-align: top;"></form:textarea></div>
+				<div><span class="stress">${lnote}:</span><form:textarea type="text" path="note" style="width: 300px;height: 150px; vertical-align: top;"></form:textarea></div>
 				<div>
 				<form:input type="hidden" path="authorentry"></form:input>
 				<form:input type="hidden" path="illustratorentry"></form:input>
@@ -318,8 +317,6 @@ ${msgsearchagain}
 				</div>
 			</div>
 			<br /> <br />
-
-
 		</div>
 
 		<div class="accentboxlayout">
@@ -338,7 +335,13 @@ ${msgsearchagain}
 					 <span class="stress">${lisbn13}:</span>
 					 ${bookModel.isbn13}
 				</div>
-
+<div>
+					<span class="stress">${clientname} ${lnumber}:</span>
+				<c:choose>
+					<c:when test="${bookModel.clientbookid!=null and bookModel.clientbookid!=''  }"> ${bookModel.clientbookid}</c:when>
+					<c:otherwise>- - - - -</c:otherwise></c:choose>
+				</div>
+				<form:input type="hidden" path="bookid"></form:input>
 			</div>
 			
 			<c:if test="${bookModel.bookid ==null}"> 

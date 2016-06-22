@@ -1,6 +1,7 @@
 package meg.biblio.catalog;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,6 +52,9 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Autowired
 	ScalarFunction<Boolean> scalarDb;
+	
+	@Autowired
+	ScalarFunction<BigInteger> scalarLongDb;	
 
 
 	@Autowired
@@ -345,14 +349,8 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	private BookDao createBookFromBookModel(Long clientkey, BookModel model) {
-		Boolean createid = model.getCreatenewid();
-		model.setCreatenewid(false);
 		// get configuration for barcodes
 		ClientDao client = clientService.getClientForKey(clientkey);
-		Boolean useclientbookforbarcode = client.getIdForBarcode();
-		if (useclientbookforbarcode == null) {
-			useclientbookforbarcode = true;
-		}
 
 		// get book
 		BookDao book = model.getBook();
@@ -367,24 +365,24 @@ public class CatalogServiceImpl implements CatalogService {
 		book.setClientid(clientkey);
 
 		// make new clientbookid if needed
-		if (createid) {
+		if (book.getClientbookid() == null
+				|| book.getClientbookid().length() == 0) {
+			// no client book number was entered - get the next one
 			// get max bookid
-			Long maxbookid = clientService.getAndIncrementLastBookNr(clientkey);
+			Long maxbookid = getMaxLastBookNrForClient(clientkey);
+			maxbookid++;
 			// set max bookid in book
 			book.setClientbookid(maxbookid.toString());
 		}
-
-		// create barcode from clientbookid if configured
-		// configured - if clientbookid not null, and usesclientforbarcode true
-		if (book.getClientbookid() != null && useclientbookforbarcode) {
-			// get barcode from clientbookid
-			String barcode = barcodeService.getBookBarcodeForClientid(client,
-					book.getClientbookid());
-			// set in bookdetail
-			if (barcode != null) {
-				book.setBarcodeid(barcode);
-			}
+		
+		// create barcode from clientbookid 
+		String barcode = barcodeService.getBookBarcodeForClientid(client,
+				book.getClientbookid());
+		// set in bookdetail
+		if (barcode != null) {
+			book.setBarcodeid(barcode);
 		}
+
 
 		// add default entries for status, detail status, type
 		if (book.getStatus()==null) {
@@ -465,7 +463,13 @@ public class CatalogServiceImpl implements CatalogService {
 
 	}
 
-
+	private Long getMaxLastBookNrForClient(Long clientkey) {
+		String sql = "select max(clientbookidsort) from book where clientid="
+				+ clientkey;
+		BigInteger maxbook = scalarLongDb.singleResult(sql);
+	
+		return maxbook!=null?maxbook.longValue():0L;
+	}
 
 	@Override
 	public void assignShelfClassToBooks(Long shelfclassUpdate,
@@ -732,4 +736,39 @@ public class CatalogServiceImpl implements CatalogService {
 		return null;
 	}
 
+	
+	
+	@Override
+	public void changeClientBookNr(String newclientbookid, Long bookid,
+			ClientDao client) {
+		// check for filled in newclientbookid
+		if (newclientbookid != null) {
+			newclientbookid = newclientbookid.trim();
+			if (newclientbookid.length() > 0) {
+				// verify no book exists with new clientbookid
+				List<BookDao> matchingbooks = bookRepo
+						.findBookByClientAssignedId(newclientbookid,
+								client.getId());
+				if (matchingbooks == null || matchingbooks.size() == 0) {
+					// retrieve book
+					BookDao tochange = bookRepo.findOne(bookid);
+					// set clientbookid in book
+					tochange.setClientbookid(newclientbookid);
+					// make barcode and save in book
+					String barcode = barcodeService.getBookBarcodeForClientid(
+							client, newclientbookid);
+					// set in bookdetail
+					if (barcode != null) {
+						tochange.setBarcodeid(barcode);
+					}
+
+					// save book
+					saveBook(tochange);
+				}
+			}
+		}
+	}
+
+
+	
 }

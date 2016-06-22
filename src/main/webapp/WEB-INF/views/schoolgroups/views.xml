@@ -8,7 +8,9 @@
     <definition extends="default" name="schoolgroups/edit">
         <put-attribute name="body" value="/WEB-INF/views/schoolgroups/edit.jspx"/>
     </definition>
-        
+    <definition extends="default" name="schoolgroups/confirmdelete">
+        <put-attribute name="body" value="/WEB-INF/views/schoolgroups/confirmdeleteclass.jspx"/>
+    </definition>        
     <definition extends="default" name="schoolgroups/list">
         <put-attribute name="body" value="/WEB-INF/views/schoolgroups/list.jspx"/>
     </definition>
@@ -20,6 +22,10 @@
     <definition extends="default" name="schoolgroups/increment">
         <put-attribute name="body" value="/WEB-INF/views/schoolgroups/increment.jspx"/>
     </definition>      
+    
+        <definition extends="default" name="schoolgroups/clearclasslists">
+        <put-attribute name="body" value="/WEB-INF/views/schoolgroups/clearclasslists.jspx"/>
+    </definition>   
     
     <definition extends="default" name="schoolgroups/remove">
         <put-attribute name="body" value="/WEB-INF/views/schoolgroups/remove.jspx"/>

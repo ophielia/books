@@ -245,6 +245,20 @@ a.menu,a.menu:link,a.menu:visited {
 	height: 25px;
 }
 
+a.textlink:link {
+    background-color: white;
+    color: #2e537d;
+    font-weight: bolder;	
+        font-size: 14px;
+}
+
+a.textlink:visited {
+    background-color: white;
+    color: #2e537d;
+    font-weight: bolder;
+        font-size: 14px;	
+}
+
 /* progress bar elements */
 #progress {
  width: 98%;   
@@ -421,6 +435,19 @@ table a.linkbutton:link {
 	background-color: #2e537d;
 	text-decoration: none;
 }
+
+table a.textlink:link {
+    background-color: white;
+    color: #2e537d;
+    font-weight: bolder;	
+}
+
+table a.textlink:visited {
+    background-color: white;
+    color: #2e537d;
+    font-weight: bolder;	
+}
+
 
 .utilbox {
 	width: 18px;
@@ -666,6 +693,46 @@ span.linkbuttonquiet {
 	font-family: Arial
 }
 
+a.linkbuttonsmall {
+	    padding: 3px;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 12px;
+    color: #7390b1;
+        background-color: #2e537d;
+        text-decoration: none;
+}
+
+a.linkbuttonsmall:link {
+	    padding: 3px;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 12px;
+    color: #7390b1;
+ text-decoration: none;
+        background-color: #2e537d;
+}
+
+a.linkbuttonsmall:hover {
+	    padding: 3px;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 12px;
+    color: #7390b1;
+        background-color: #2e537d;
+        text-decoration: none;
+}
+
+a.linkbuttonsmall:visited {
+	    padding: 3px;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 12px;
+    color: #7390b1;
+        background-color: #2e537d;
+        text-decoration: none;
+}
+
 a.linkbuttonquiet {
 	display: inline-block;
 	overflow: hidden;
@@ -720,6 +787,14 @@ input.linkbutton {
 	outline: 0;
 	height: 31px;
 	border: 0px;
+}
+
+input.fauxlink {
+	    border-width: 0px;
+    background-color: white;
+    color: #2E537D;
+    font-weight: bolder;
+    font-size:12pt;
 }
 
 .selectspan {

@@ -1,12 +1,16 @@
-Branch 
+Branch - usability
 
-future - check addbook - how does it get the new code?
-future - two stage for remove all students from class
-small bug - after printout page class pdf, change of select leads to new page (target...)
-	
-
-
-
+later - search box on top
+later - student names - first word only to first name, rest to last name
+later - student names - flag for repeat in class
+				displayFirstName - which shows first name only unless repeat. 
+				      if repeat, show firstname, first initial last. 
+				      if first initial last repeat, show firstname lastname.
+later - sort in lending history by student name needs to do first name and last name
+later - add teacher name edit to class overview	
+later - 	show only first 10 checkouts - with link to complete history
+later - -small bug - after printout page class pdf, change of select leads to new page (target...)
+later -  add message to changeid page- highest assigned number??
 
 		
 ---- begin commit changes ----
@@ -16,6 +20,60 @@ small bug - after printout page class pdf, change of select leads to new page (t
 
 
 ----- begin branch changes ----
+
+
+done - check / fix generate new number (max + 1)
+done - make enter number the default
+done -- clear class lists
+done - labels for clear class lists
+done - spiff up class management tools page
+done - check / fix generate new number (max + 1)
+done - make enter number the default
+done -- clear class lists - safety confirm
+done - proof of concept - ipad / mobile bluetooth scans
+done - verify code
+done - self checkout
+done - inventory	
+done - confirm / validate "dangerous" clicks
+done - 	delete class
+done - make labels for confirm delete class
+done - class list page - remove edit - only display
+done - name goes to display
+	done - status column translated to text
+	done - no notes column
+	nevermind - author together with title??
+	done - name goes directly to next page (checkout book)
+	done - book title goes to book display
+	done - students names to display
+	done - book title to display
+	done - sql fix - translate description to french
+done- checkout manual - make it look the same as with the barcode (checkoutsuccess.jspx)
+done - 	check look and feel - a little too far up
+done - add a return / continue button....	
+done - two stage for remove all students from class
+done - lending history doesn't show all records...
+done - check addbook - how does it get the new code?
+done - Bugfix - lending history showing incorrectly  - not showing enough....
+done - 	do we still need criteria.setCheckedoutOnly???
+done - 	currently in getPredicatesForCriteria
+done - clean out LendingSearchCriteria
+done - lending history shows Returnedlate column
+done - class overview - count of students
+done -    printout page for reconciled books
+done - 	test - printout only when 200 or less books
+done - 	add client name to column headers
+done - Note in book display - needs label
+done - Check - no number entered on book info - should generate error.
+done - 	remove generate new number box
+done - first, move client number to accent box-editbook.jspx,show.jspx,showhistory.jspx
+done - next - controller to direct to page
+done - make page - like edit, but with input box for the id
+done - controller to save information - verify
+done - service to change id
+done - in addBook, a processNewBook function which adds an id if it doesn't exist
+done - in nr display - editbook, show and showhistory, change little link to Change / Modify
+done - on changebookid page, need labels for Current (Clientshortname) Number / New Number 
+done - add change book code to book display		
 
 
 ---- end branch changes ----
@@ -96,7 +154,7 @@ db testing - problem with views.  LendingSearchService fails.  check this link -
 
 
 ----- December 2015 - Big Picture ----
-printing
+printing - online v1_0_1 february 2016
 client interface
 images to db
 z59

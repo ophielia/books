@@ -182,7 +182,7 @@ public class SchoolGroupController {
     	}
 
     	// get lending history for student
-    	List<LoanRecordDisplay> lendhistory = lendingService.getLendingHistoryByLender(studentid, client.getId());
+    	List<LoanRecordDisplay> lendhistory = lendingService.getLendingHistoryByBorrower(studentid, client.getId());
 
     	// put classmodel in model
     	uiModel.addAttribute("lendinghistory",lendhistory);
@@ -337,7 +337,17 @@ public class SchoolGroupController {
     	return "schoolgroups/edit";
 	}
 
-    @RequestMapping(value="/delete/{id}", method = RequestMethod.GET, produces = "text/html")
+    @RequestMapping(value="/delete/confirm/{id}", method = RequestMethod.GET, produces = "text/html")
+    public String confirmDeleteClass(@PathVariable("id") Long id, Model uiModel, HttpServletRequest httpServletRequest, Principal principal) {
+    	ClientDao client = clientService.getCurrentClient(principal);
+
+    	uiModel.addAttribute("classid",id);
+
+    	// return class list view
+    	return "schoolgroups/confirmdelete";
+    	}
+
+    @RequestMapping(value="/delete/{id}", method = RequestMethod.POST, produces = "text/html")
     public String deleteClass(@PathVariable("id") Long id, Model uiModel, HttpServletRequest httpServletRequest, Principal principal) {
     	ClientDao client = clientService.getCurrentClient(principal);
 
@@ -346,7 +356,7 @@ public class SchoolGroupController {
     	// return class list view
     	return "redirect:/classes";
     	}
-
+    
     @RequestMapping(value="/manage",  method = RequestMethod.GET, produces = "text/html")
     public String showManagementPage(Model uiModel, HttpServletRequest httpServletRequest) {
 
@@ -376,7 +386,16 @@ public class SchoolGroupController {
 
     	}
 
-    @RequestMapping(value="/manage", params="clearlists", method = RequestMethod.POST, produces = "text/html")
+    @RequestMapping(value="/manage/clearlists",  method = RequestMethod.GET, produces = "text/html")
+    public String showClearClassLists(Model uiModel, HttpServletRequest httpServletRequest, Principal principal) {
+    	ClientDao client = clientService.getCurrentClient(principal);
+
+		uiModel.addAttribute("clearsuccess",false);
+    	// return clear class lists view
+    	return "schoolgroups/clearclasslists";
+    	}
+    
+    @RequestMapping(value="/manage/clearlists",method = RequestMethod.POST, produces = "text/html")
     public String clearClassLists(Model uiModel, HttpServletRequest httpServletRequest, Principal principal) {
     	ClientDao client = clientService.getCurrentClient(principal);
 
@@ -386,7 +405,7 @@ public class SchoolGroupController {
     	// return edit class view
     	return "schoolgroups/settings";
 
-    	}
+    	}    
 
 
 	@RequestMapping(value = "/manage", params = "toremove", method = RequestMethod.POST, produces = "text/html")
